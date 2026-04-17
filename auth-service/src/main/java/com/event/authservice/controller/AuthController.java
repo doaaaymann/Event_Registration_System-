@@ -52,14 +52,14 @@ public class AuthController {
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserResponse> getUser(@AuthenticationPrincipal AuthUserPrincipal principal,
-                                                @PathVariable Long userId) {
+                                                @PathVariable("userId") Long userId) {
         authService.ensureSelfOrAdmin(principal, userId);
         return ResponseEntity.ok(authService.getUserById(userId));
     }
 
     @GetMapping("/users/{userId}/roles")
     public ResponseEntity<List<String>> getUserRoles(@AuthenticationPrincipal AuthUserPrincipal principal,
-                                                     @PathVariable Long userId) {
+                                                     @PathVariable("userId") Long userId) {
         authService.ensureSelfOrAdmin(principal, userId);
         return ResponseEntity.ok(authService.getUserRoles(userId));
     }
