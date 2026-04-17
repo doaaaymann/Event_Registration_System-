@@ -164,6 +164,7 @@ A database is required to persist system data such as:
 - registrations
 - notifications
 
+<<<<<<< HEAD
 In a microservices design, each service may own its own database schema or database depending on the chosen architecture.
 
 ## Software Engineering Deliverables
@@ -181,3 +182,5 @@ These deliverables are important for explaining system behavior, design decision
 ## Expected Outcome
 
 The final system should provide a complete event registration platform where authorized users can manage events and participants can register for them securely through REST APIs in a Dockerized microservices environment.
+=======
+>>>>>>> e61c7c2ff79397e5dbc64ea39c23a2e3e98b7dbd
