@@ -1,0 +1,18 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: ${EVENT_DB_URL:jdbc:postgresql://localhost:5432/event_db}
+    username: ${EVENT_DB_USERNAME:postgres}
+    password: ${EVENT_DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration

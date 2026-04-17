@@ -1,0 +1,147 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: event-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/database/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  config-server:
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    container_name: config-server
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: eureka-server/Dockerfile
+    container_name: eureka-server
+    restart: unless-stopped
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+    depends_on:
+      - config-server
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    restart: unless-stopped
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+    depends_on:
+      - config-server
+      - eureka-server
+    ports:
+      - "8080:8080"
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: auth-service
+    restart: unless-stopped
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+      AUTH_DB_URL: jdbc:postgresql://postgres:5432/auth_db
+      AUTH_DB_USERNAME: postgres
+      AUTH_DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+    ports:
+      - "8081:8081"
+
+  event-service:
+    build:
+      context: .
+      dockerfile: event-service/Dockerfile
+    container_name: event-service
+    restart: unless-stopped
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+      EVENT_DB_URL: jdbc:postgresql://postgres:5432/event_db
+      EVENT_DB_USERNAME: postgres
+      EVENT_DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+    ports:
+      - "8082:8082"
+
+  registration-service:
+    build:
+      context: .
+      dockerfile: registration-service/Dockerfile
+    container_name: registration-service
+    restart: unless-stopped
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+      REGISTRATION_DB_URL: jdbc:postgresql://postgres:5432/registration_db
+      REGISTRATION_DB_USERNAME: postgres
+      REGISTRATION_DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+    ports:
+      - "8083:8083"
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: notification-service
+    restart: unless-stopped
+    environment:
+      CONFIG_SERVER_URI: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+      NOTIFICATION_DB_URL: jdbc:postgresql://postgres:5432/notification_db
+      NOTIFICATION_DB_USERNAME: postgres
+      NOTIFICATION_DB_PASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config-server:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+    ports:
+      - "8084:8084"
+
+volumes:
+  postgres-data:

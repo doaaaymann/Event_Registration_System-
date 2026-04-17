@@ -1,0 +1,26 @@
+# Maven
+target/
+.mvn/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+
+# Java crash logs
+hs_err_pid*
+replay_pid*

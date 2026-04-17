@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+        - id: event-service
+          uri: lb://event-service
+          predicates:
+            - Path=/api/events/**
+        - id: registration-service
+          uri: lb://registration-service
+          predicates:
+            - Path=/api/registrations/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
